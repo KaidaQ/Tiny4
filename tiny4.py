@@ -15,12 +15,24 @@ class Tiny4CPU:
         #an opcode and operand make 1 full CPU instruction
 
         if opcode == 0x01: #LOAD (01:XX) // Load value from mem addr XX to reg A
-            self.A == self.RAM[operand] 
+            self.A = self.RAM[operand] 
             print(f"LOAD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
             self.RAM[operand] = self.A
+
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
             self.A = (self.A + self.RAM[operand]) & 0xFF
+
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end
-            self.running == False 
-        
+            self.running == False # halt the cpu instance here
+
+        else: #invalid opcode handler
+            print("Invalid opcode {opcode:02X} at {self.PC:02X}")
+            self.running == False
+
+        self.PC = (self.PC + 2) & 0xFF
+
+    def run(self): #primitive cpu activation
+        while self.running:
+            self.step()
