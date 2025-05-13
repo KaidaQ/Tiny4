@@ -35,4 +35,4 @@ def disassemble(file_path):
         pc += 2
 
 if __name__ == "__main__":
-    disassemble("output.t4c")
+    disassemble("test.t4c")
