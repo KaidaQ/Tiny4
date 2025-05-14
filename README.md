@@ -27,7 +27,7 @@ Instruction length: 2 bytes (opcode + operand)
 
 CPU Memory Map
 Address Range | For what purpose?
-0x00-0x08     | Reserved fir .t4c metadata
+0x00-0x08     | Reserved for .t4c metadata
 0x08-0xEF     | General-Purpose RAM
 0xF0-0xFF     | Reserved / Input/Output / Read-Only Memory
 
