@@ -41,6 +41,8 @@ if __name__ == "__main__":
         f.write(bytes([start_addr]))
         f.write(bytes([entry_point]))
         f.write(bytes([program_size]))
+        f.write(b'\x00') # reserved byte
         f.write(bytes(program))
+
 
 print(f"successfully compiled t {output_file} ({program_size} bytes!)")

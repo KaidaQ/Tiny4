@@ -20,12 +20,20 @@ class Tiny4CPU:
 
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
             self.RAM[operand] = self.A
+            print(f"STORE from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
             self.A = (self.A + self.RAM[operand]) & 0xFF
-
+            print(f"ADD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end
             self.running == False # halt the cpu instance here
+            print(f"HALT from ${opcode:02X}")
+        elif opcode == 0x00: #NOP (00) // CPU does not do any instructions
+            # Technically, the cpu physically would run this as an instruction
+            # But nothing happens here...
+            # Neat
+            print(f"NOP from ${opcode:02X}")
 
         else: #invalid opcode handler
             print("Invalid opcode {opcode:02X} at {self.PC:02X}")

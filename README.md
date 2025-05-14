@@ -12,6 +12,26 @@ Included in this project is;
 (technically the CPU emulator is a disassembler but we dont talk about that shh)
 
 ---
+## CPU specifications
+```
+Tiny-4 CPU Unit
+
+RAM: 256 bytes (0x00-0xFF)
+Registers
+  - A (Accumulator, 1 byte)
+  - PC (Program Counter, 1 byte, wraps around at 0xFF)
+Opcodes: 4 total (each 1 byte)
+
+Word size: 8-bit
+Instruction length: 2 bytes (opcode + operand)
+
+CPU Memory Map
+Address Range | For what purpose?
+0x00-0x08     | Reserved fir .t4c metadata
+0x08-0xEF     | General-Purpose RAM
+0xF0-0xFF     | Reserved / Input/Output / Read-Only Memory
+
+```
 
 ## File Format 'Tiny-4 Compiled'
 
@@ -24,8 +44,10 @@ Tiny-4 uses a binary format with the following layout
 |0x04  |1 Bytes |Start addr in RAM|
 |0x05  |1 Bytes |Entry point for PC|
 |0x06  |1 Bytes |Program size (in bytes)|
-|0x07  |n Bytes |Program instruction data|
+|0x07  |1 Bytes |Padding byte|
+|0x08  |n Bytes |Program instruction data|
 
+An average t4c file will be minimum, 8 bytes.
 ---
 
 ## CPU 'tiny4.py'
@@ -126,3 +148,5 @@ This will add the value at addr 0x02 to A three times, then HALT.
 - Hands preferably
 
 ## License
+
+This project is licensed umder the terms of the [MIT License](LICENSE)

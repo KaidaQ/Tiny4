@@ -11,7 +11,7 @@ def disassemble(file_path):
     start_addr = data[4]
     entry_point = data[5]
     size = data[6]
-    program = data[7:7 + size]
+    program = data[8:8 + size]
 
     print(f"T4C v{version} Start: ${start_addr:02X} Entry: ${entry_point:02X} Size: {size} bytes!")
 
@@ -31,8 +31,14 @@ def disassemble(file_path):
         elif opcode == 0x00:
             print(f"{pc:02X}: NOP")
         else:
-            print(f"{pc:02X}: Invalid opcode at ($(opcode:02X))")
+            print(f"{pc:02X}: Invalid opcode at (${opcode:02X})")
         pc += 2
 
 if __name__ == "__main__":
-    disassemble("test.t4c")
+    file_path = input("Enter the name to your .t4c file: ").strip()
+    try:
+        disassemble(file_path)
+    except FileNotFoundError:
+        print(f"Err: File '{file_path}' not found.")
+    except ValueError as e:
+        print(f"Err: {e}")
