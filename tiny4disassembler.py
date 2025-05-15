@@ -24,18 +24,33 @@ def disassemble(file_path):
         opcode = program[pc]
         operand = program[pc+1] if (pc+1) < len(program) else 0x00 # Simulate the actual Program Counter :D
         
+        # LOAD AND STORE
         if opcode == 0x01:
             print(f"{pc:02X}: LOAD  ${operand:02X}")
         elif opcode == 0x02:
             print(f"{pc:02X}: STORE  ${operand:02X}")
+
+        # ARITHMETIC
         elif opcode == 0x03:
             print(f"{pc:02X}: ADD  ${operand:02X}")
+        elif opcode == 0x04:
+            print(f"{pc:02X}: SUB  ${operand:02X}")
+
+        # CONTROL FLOW
+        elif opcode == 0x08:
+            print(f"{pc:02X}: JMP  ${operand:02X}")
+        elif opcode == 0x09:  
+            print(f"{pc:02X}: JZ  ${operand:02X}")
+        elif opcode == 0x0A:
+            print(f"{pc:02X}: JNZ  ${operand:02X}")
+
+        # END LOGIC
         elif opcode == 0xFF:
             print(f"{pc:02X}: HALT")
         elif opcode == 0x00:
             print(f"{pc:02X}: NOP")
         else:
-            print(f"{pc:02X}: Invalid opcode at (${opcode:02X})")
+            print(f"{pc:02X}: Invalid opcode at (${opcode:02X}), or data.")
         pc += 2
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ class Tiny4CPU:
         self.PC = 0
         self.running = True
 
-    def set_a(self,value):
+    def set_A(self,value):
         self.A = value & 0xFF
         self.Z - (self.A == 0)
 
@@ -49,46 +49,52 @@ class Tiny4CPU:
         # LOAD and STORE logic
         if opcode == 0x01: #LOAD (01:XX) // Load value from mem addr XX to reg A
             self.A = self.RAM[operand] 
-            print(f"LOAD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[LOAD] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
             self.RAM[operand] = self.A
-            print(f"STORE from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[STORE] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
-            self.A = (self.A + self.RAM[operand]) & 0xFF
-            print(f"ADD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            self.set_A(self.A + self.RAM[operand])
+            print(f"[ADD] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x04: #SUB (04:XX) // Subtract value from mem addr XX to reg A
-            self.A = (self.A - self.RAM[operand]) & 0xFF
-            print(f"SUB from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            self.set_A(self.A - self.RAM[operand])
+            print(f"[SUB] from ${operand:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         # Control flow
         elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
             self.PC = operand
-            print(f"JMP to ${operand:02X}")
-            return
-        elif opcode == 0x09: #JMP (09:XX) // Directly jump to adr XX IF A = 0
-            if (self.A == 0):
-                self.PC = operand
-                print(f"JZ to ${operand:02X}")
-                return
-            print(f"A is not zero. Not jumping to ${operand:02X}")
+            print(f"[JMP] to ${operand:02X}")
             return
         
+        elif opcode == 0x09: #JZ (09:XX) // Directly jump to addr XX IF A = 0
+            if self.Z:
+                self.PC = operand
+                print(f"[JZ] to ${operand:02X}")
+                return
+            print(f"[JZ] A is not zero. Not jumping to ${operand:02X}")
+
+        elif opcode == 0x0A: #JNZ (0A:XX) // Directly jump to addr XX IF A != 0
+            if not self.Z:
+                self.PC = operand
+                print(f"[JNZ] to ${operand:02X}")
+                return
+            print(f"[JNZ] A is zero. Not jumping to ${operand:02X}")
 
         # End logic
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end
             self.running = False # halt the cpu instance here
-            print(f"HALT from ${opcode:02X}")
+            print(f"[HALT] from ${opcode:02X}")
             return
 
         elif opcode == 0x00: #NOP (00) // CPU does not do any instructions
             # Technically, the cpu physically would run this as an instruction
             # But nothing happens here...
             # Neat
-            print(f"NOP from ${opcode:02X}")
+            print(f"[NOP] from ${opcode:02X}")
 
         else: #invalid opcode handler
             print(f"Invalid opcode {opcode:02X} at {self.PC:02X}")
