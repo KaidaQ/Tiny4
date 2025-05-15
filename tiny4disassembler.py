@@ -11,7 +11,11 @@ def disassemble(file_path):
     start_addr = data[4]
     entry_point = data[5]
     size = data[6]
+    padding = data[7]
     program = data[8:8 + size]
+
+    if padding != 0:
+        print(f"Warning: Padding byte is {padding:02X} - possibly a pirated/corrupt ROM!")
 
     print(f"T4C v{version} Start: ${start_addr:02X} Entry: ${entry_point:02X} Size: {size} bytes!")
 

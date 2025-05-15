@@ -9,7 +9,6 @@ output_file = "output.t4c"
 if os.path.exists(output_file):
     os.remove(output_file)
 
-
 # test program if none is given
 test_program = [
     0x03, 0x02,
@@ -44,5 +43,4 @@ if __name__ == "__main__":
         f.write(b'\x00') # reserved byte
         f.write(bytes(program))
 
-
-print(f"successfully compiled t {output_file} ({program_size} bytes!)")
+print(f"successfully compiled to {output_file} ({program_size} bytes!)")
