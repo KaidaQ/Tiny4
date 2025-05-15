@@ -4,8 +4,13 @@ class Tiny4CPU:
     def __init__(self):
         self.RAM = [0] * 256 # 256 bytes of memory;
         self.A = 0
+        self.Z = 0
         self.PC = 0
         self.running = True
+
+    def set_a(self,value):
+        self.A = value & 0xFF
+        self.Z - (self.A == 0)
 
     def load_t4c(self, filepath):
         with open(filepath, "rb") as f:
@@ -38,8 +43,10 @@ class Tiny4CPU:
         print(f"Executing at PC=${self.PC:02X}")
         opcode = self.RAM[self.PC] #current opcode will be left byte (e.g $00;0x01)
         operand = self.RAM[(self.PC + 1) & 0xFF] #current operand will be right byte (e.g $01;0x0F)
+        
         #an opcode and operand make 1 full CPU instruction
 
+        # LOAD and STORE logic
         if opcode == 0x01: #LOAD (01:XX) // Load value from mem addr XX to reg A
             self.A = self.RAM[operand] 
             print(f"LOAD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
@@ -48,10 +55,30 @@ class Tiny4CPU:
             self.RAM[operand] = self.A
             print(f"STORE from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
+        # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
             self.A = (self.A + self.RAM[operand]) & 0xFF
             print(f"ADD from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
-            
+
+        elif opcode == 0x04: #SUB (04:XX) // Subtract value from mem addr XX to reg A
+            self.A = (self.A - self.RAM[operand]) & 0xFF
+            print(f"SUB from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+
+        # Control flow
+        elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
+            self.PC = operand
+            print(f"JMP to ${operand:02X}")
+            return
+        elif opcode == 0x09: #JMP (09:XX) // Directly jump to adr XX IF A = 0
+            if (self.A == 0):
+                self.PC = operand
+                print(f"JZ to ${operand:02X}")
+                return
+            print(f"A is not zero. Not jumping to ${operand:02X}")
+            return
+        
+
+        # End logic
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end
             self.running = False # halt the cpu instance here
             print(f"HALT from ${opcode:02X}")
