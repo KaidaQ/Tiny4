@@ -10,7 +10,7 @@ class Tiny4CPU:
 
     def set_A(self,value):
         self.A = value & 0xFF
-        self.Z - (self.A == 0)
+        self.Z = (self.A == 0)
 
     def load_t4c(self, filepath):
         with open(filepath, "rb") as f:
@@ -40,7 +40,7 @@ class Tiny4CPU:
             self.RAM[start+i] = byte
 
     def step(self):
-        print(f"Executing at PC=${self.PC:02X}")
+        print(f"Executing instruction PC=${self.PC:02X}")
         opcode = self.RAM[self.PC] #current opcode will be left byte (e.g $00;0x01)
         operand = self.RAM[(self.PC + 1) & 0xFF] #current operand will be right byte (e.g $01;0x0F)
         
@@ -49,27 +49,26 @@ class Tiny4CPU:
         # LOAD and STORE logic
         if opcode == 0x01: #LOAD (01:XX) // Load value from mem addr XX to reg A
             self.A = self.RAM[operand] 
-            print(f"[LOAD] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[LOAD] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
             self.RAM[operand] = self.A
-            print(f"[STORE] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[STORE] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
 
 
         # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
             self.set_A(self.A + self.RAM[operand])
-            print(f"[ADD] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[ADD] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x04: #SUB (04:XX) // Subtract value from mem addr XX to reg A
             self.set_A(self.A - self.RAM[operand])
-            print(f"[SUB] from ${operand:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+            print(f"[SUB] from ${operand:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x05: #CMP (05:XX) // Compare value from mem addr XX to reg A, set zero flag true if equal to XX
             self.Z = (self.A == self.RAM[operand])
-            print(f"[CMP] A from ${self.A:02X}, RAM {operand:02X} = ${self.RAM[operand]:02X}, Z = {int(self.Z)}")
-
+            print(f"[CMP] A from ${self.A:02X}, RAM ${operand:02X} = ${self.RAM[operand]:02X}, Z = {int(self.Z)}")
 
         # Control flow
         elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
@@ -77,24 +76,37 @@ class Tiny4CPU:
             print(f"[JMP] to ${operand:02X}")
             return
         
-        elif opcode == 0x09: #JZ (09:XX) // Directly jump to addr XX IF A = 0
+        elif opcode == 0x09: #JZ (09:XX) // Jump if zero flag is set
             if self.Z:
                 self.PC = operand
                 print(f"[JZ] to ${operand:02X}")
                 return
             print(f"[JZ] A is not zero. Not jumping to ${operand:02X}")
 
-        elif opcode == 0x0A: #JNZ (0A:XX) // Directly jump to addr XX IF A != 0
+        elif opcode == 0x0A: #JNZ (0A:XX) // Jump if zero flag is NOT set
             if not self.Z:
                 self.PC = operand
                 print(f"[JNZ] to ${operand:02X}")
                 return
             print(f"[JNZ] A is zero. Not jumping to ${operand:02X}")
 
+        elif opcode == 0x0B: #CALL (0B:XX) // Subroutine support; Store current PC+2 val to 0xF0, then jump to XX
+            self.RAM[0xF0] = (self.PC + 2) & 0xFF
+            self.PC = operand
+            print(f"[CALL] to ${operand:02X}")
+            return
+        
+        elif opcode == 0x0C: #RET (0C:XX) // Subroutine support; Set PC as value in 0xF0
+            self.PC = self.RAM[0xF0]
+            print(f"RET to ${self.PC:02X}")
+        
+        elif opcode == 0x0D: #OUT (0D:XX) // Print mem contents
+            print(f"[OUT] RAM[{operand:02X}] = 0x{self.RAM[operand]:02X}")
+
         # End logic
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end
             self.running = False # halt the cpu instance here
-            print(f"[HALT] from ${opcode:02X}")
+            print(f"[HALT] from ${self.RAM[opcode]:02X}")
             return
 
         elif opcode == 0x00: #NOP (00) // CPU does not do any instructions
@@ -102,8 +114,6 @@ class Tiny4CPU:
             # But nothing happens here...
             # Neat
             print(f"[NOP] from ${opcode:02X}")
-
-
 
         else: #invalid opcode handler
             print(f"Invalid opcode {opcode:02X} at {self.PC:02X}")
