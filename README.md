@@ -1,7 +1,7 @@
 # Tiny4
 Hypothetical CPU based in Python;
 
-A minimalistic 8-bit virtual CPU designed to emulate simple bytecode instructions, akin to low level computer architecture.
+A retro-like 8-bit virtual CPU designed to emulate simple bytecode instructions, akin to low level computer architecture.
 
 Included in this project is;
 
@@ -12,26 +12,6 @@ Included in this project is;
 (technically the CPU emulator is a disassembler but we dont talk about that shh)
 
 ---
-## CPU specifications
-```
-Tiny-4 CPU Unit
-
-RAM: 256 bytes (0x00-0xFF)
-Registers
-  - A (Accumulator, 1 byte)
-  - PC (Program Counter, 1 byte, wraps around at 0xFF)
-Opcodes: 4 total (each 1 byte)
-
-Word size: 8-bit
-Instruction length: 2 bytes (opcode + operand)
-
-CPU Memory Map
-Address Range | For what purpose?
-0x00-0x08     | Reserved for .t4c metadata
-0x08-0xEF     | General-Purpose RAM
-0xF0-0xFF     | Reserved / Input/Output / Read-Only Memory
-
-```
 
 ## File Format 'Tiny-4 Compiled'
 
@@ -44,10 +24,9 @@ Tiny-4 uses a binary format with the following layout
 |0x04  |1 Bytes |Start addr in RAM|
 |0x05  |1 Bytes |Entry point for PC|
 |0x06  |1 Bytes |Program size (in bytes)|
-|0x07  |1 Bytes |Padding byte|
+|0x07  |1 Bytes |Region/Padding byte|
 |0x08  |n Bytes |Program instruction data|
 
-An average t4c file will be minimum, 8 bytes.
 ---
 
 ## CPU 'tiny4.py'
@@ -68,6 +47,8 @@ A simple fetch-decode-execute loop with:
 |0x03|`ADD`|Add value from RAM to `A`                 |
 |0xFF|`HALT`|Stop execution                            |
 |0x00|`NOP`|No operation                              |
+
+and more viewable, at the CPU's website; [Tiny-4](https://kaidaq.github.io/tiny4)
 
 ---
 
@@ -109,12 +90,12 @@ Disassembling e.g, a .t4c file with
 54 34
 43 01
 00 00
-FF 01
-50 02
-30 03
-04 03
-04 03
-04
+FF 00
+01 50 
+02 30 
+03 04 
+03 04 
+03 04
 ```
 
 ```bash
@@ -127,26 +108,3 @@ T4C v1 Start: $00 Entry: $00 Size: 255 bytes!
 0A: ADD  $04
 ```
 
-## Sample Program
-
-The default test program in 'tiny4compiler.4':
-```bash
-test_program = [
-    0x03, 0x02,
-    0x03, 0x02,
-    0x03, 0x02,
-    0xFF, 0x00
-]
-```
-This will add the value at addr 0x02 to A three times, then HALT.
-
-## Requirements
-
-- Python 3+
-- No external dependencies
-- Fingers
-- Hands preferably
-
-## License
-
-This project is licensed umder the terms of the [MIT License](LICENSE)

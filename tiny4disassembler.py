@@ -45,6 +45,12 @@ def disassemble(file_path):
             print(f"{pc:02X}: JZ ${operand:02X}")
         elif opcode == 0x0A:
             print(f"{pc:02X}: JNZ ${operand:02X}")
+        elif opcode == 0x0B:
+            print(f"{pc:02X}: CALL ${operand:02X}")  
+        elif opcode == 0x0C:
+            print(f"{pc:02X}: RET ${operand:02X}")
+        elif opcode == 0x0D:
+            print(f"{pc:02X}: OUT ${operand:02X}")  
 
         # END LOGIC
         elif opcode == 0xFF:
