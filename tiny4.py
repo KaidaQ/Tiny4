@@ -55,6 +55,8 @@ class Tiny4CPU:
             self.RAM[operand] = self.A
             print(f"[STORE] from ${opcode:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
 
+
+
         # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
             self.set_A(self.A + self.RAM[operand])
@@ -63,6 +65,11 @@ class Tiny4CPU:
         elif opcode == 0x04: #SUB (04:XX) // Subtract value from mem addr XX to reg A
             self.set_A(self.A - self.RAM[operand])
             print(f"[SUB] from ${operand:02X}, value = ${self.RAM[operand]:02X}, A = ${self.A:02X}")
+
+        elif opcode == 0x05: #CMP (05:XX) // Compare value from mem addr XX to reg A, set zero flag true if equal to XX
+            self.Z = (self.A == self.RAM[operand])
+            print(f"[CMP] A from ${self.A:02X}, RAM {operand:02X} = ${self.RAM[operand]:02X}, Z = {int(self.Z)}")
+
 
         # Control flow
         elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
@@ -95,6 +102,8 @@ class Tiny4CPU:
             # But nothing happens here...
             # Neat
             print(f"[NOP] from ${opcode:02X}")
+
+
 
         else: #invalid opcode handler
             print(f"Invalid opcode {opcode:02X} at {self.PC:02X}")
