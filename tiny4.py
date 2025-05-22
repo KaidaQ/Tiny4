@@ -70,6 +70,14 @@ class Tiny4CPU:
             self.Z = (self.A == self.RAM[operand])
             print(f"[CMP] A from ${self.A:02X}, RAM ${operand:02X} = ${self.RAM[operand]:02X}, Z = {int(self.Z)}")
 
+        elif opcode == 0x06: #INC (06:XX) // Increment A register by one
+            self.set_A(self.A + 1)
+            print(f"[INC] from ${operand:02X}, A = ${self.A:02X}")
+        
+        elif opcode == 0x07: #DEC (07:XX) // Dncrement A register by one
+            self.set_A(self.A - 1)
+            print(f"[DEC] from ${operand:02X}, A = ${self.A:02X}")
+
         # Control flow
         elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
             self.PC = operand
