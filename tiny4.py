@@ -7,6 +7,7 @@ class Tiny4CPU:
         self.Z = 0
         self.PC = 0
         self.running = True
+        self.lastLog = ""
 
     def set_A(self,value):
         self.A = value & 0xFF
@@ -72,11 +73,11 @@ class Tiny4CPU:
 
         elif opcode == 0x06: #INC (06:XX) // Increment A register by one
             self.set_A(self.A + 1)
-            print(f"[INC] from ${operand:02X}, A = ${self.A:02X}")
+            print(f"[INC] from ${self.PC:02X}, A = ${self.A:02X}")
         
         elif opcode == 0x07: #DEC (07:XX) // Dncrement A register by one
             self.set_A(self.A - 1)
-            print(f"[DEC] from ${operand:02X}, A = ${self.A:02X}")
+            print(f"[DEC] from ${self.PC:02X}, A = ${self.A:02X}")
 
         # Control flow
         elif opcode == 0x08: #JMP (08:XX) // Directly jump to addr XX
