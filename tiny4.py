@@ -1,14 +1,20 @@
 import time
+from tiny4ppu import render_console, set_pixel, get_pixel
 
 class Tiny4CPU:
     def __init__(self):
         self.RAM = [0] * 256 # 256 bytes of memory;
+        self.VRAM = [0] * 32 # 256 bits of VRAM 16x16
         self.A = 0
         self.Z = 0
         self.PC = 0
+
+        self.vBlank = True
+        self.cycles = 0
+
         self.running = True
         self.lastLog = ""
-        self.SP = 0xEF # Stack starts below 0xF0
+        self.SP = 0x5F # Stack starts below 0x60
 
     def set_A(self,value):
         self.A = value & 0xFF
@@ -54,8 +60,11 @@ class Tiny4CPU:
             print(f"[LOAD] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
-            self.RAM[operand] = self.A
-            print(f"[STORE] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
+            if 0xE0 <= operand <= 0xFF and not self.vBlank: # Check for vblank, and writes to 0xE0 to 0xFF
+                print(f"VRAM access denied outside of vBlank at PC=${self.PC:02X}")
+            else:
+                self.RAM[operand] = self.A
+                print(f"[STORE] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
 
         # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
@@ -98,14 +107,16 @@ class Tiny4CPU:
                 return
             print(f"[JNZ] A is zero. Not jumping to ${operand:02X}")
 
-        elif opcode == 0x0B: #CALL (0B:XX) // Subroutine support; Store current PC+2 val to 0xF0, then jump to XX
-            self.RAM[0xF0] = (self.PC + 2) & 0xFF
+        elif opcode == 0x0B: #CALL (0B:XX) // Subroutine support; Store current PC+2 val to STACK, then jump to XX
+            self.RAM[self.SP] = (self.PC + 2) & 0xFF
+            self.SP = (self.SP - 1) & 0xFF
             self.PC = operand
             print(f"[CALL] to ${operand:02X}")
             return
         
-        elif opcode == 0x0C: #RET (0C:XX) // Subroutine support; Set PC as value in 0xF0
-            self.PC = self.RAM[0xF0]
+        elif opcode == 0x0C: #RET (0C:XX) // Subroutine support; Set PC as value in STACK
+            self.SP = (self.SP + 1) & 0xFF
+            self.PC = self.RAM[self.SP]
             print(f"RET to ${self.PC:02X}")
         
         elif opcode == 0x0D: #OUT (0D:XX) // Print mem contents
@@ -137,8 +148,18 @@ class Tiny4CPU:
             print(f"Invalid opcode {opcode:02X} at {self.PC:02X}")
             self.running = False
             return
-        
+        print(f"vBlank: {self.vBlank}")
+
+        self.cycles += 1
+
+        # every 64 cycles, enter vertical blank for 8 cycles
+        if self.cycles % 64 < 8:
+            self.vBlank = True
+        else:
+            self.vBlank = False
+
         self.PC = (self.PC + 2) & 0xFF
+        
 
     def run(self, delay): #primitive cpu activation
         while self.running:
@@ -153,6 +174,7 @@ class Tiny4CPU:
             print(f"{addr:02X}: {hex_bytes}")
 
 if __name__ == "__main__":
+    from tiny4ppu import render_console
     cpu = Tiny4CPU()
     filepath = input("Enter path to .t4c file: ").strip()
     delay = float(input("How fast is the cpu running per step (in seconds)"))
@@ -164,8 +186,12 @@ if __name__ == "__main__":
         print(f"File not found: {filepath}")
     except ValueError as e:
         print(f"Error: {e}")
-
+    
     print("CPU has stopped running.")
+
+    cpu.VRAM = cpu.RAM[0xE0:0x100] # copy VRAM from RAM
+    render_console(cpu.VRAM) # display the framebuffer
+
     print(f"A Register: {cpu.A}")
     print()
     cpu.dump_memory()

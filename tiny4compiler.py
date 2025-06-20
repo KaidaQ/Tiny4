@@ -17,13 +17,18 @@ test_program = [
     0xFF, 0x00
 ] # ADD will occur 3 times, and will HALT at end of execution.
 
+
+
+
+
+
 if os.path.exists(input_file):
     print(f"found bin input: {input_file}")
     with open(input_file, "rb") as f:
         program = list(f.read())
 else:
     print("no file found :( resorting to default testing program")
-    program = test_program
+    program = t4c_binary
 
 # TINY 4 COMPILED FILE FORMAT SPECS
 magic = b'T4C'
