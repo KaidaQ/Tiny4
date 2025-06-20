@@ -8,6 +8,7 @@ class Tiny4CPU:
         self.PC = 0
         self.running = True
         self.lastLog = ""
+        self.SP = 0xEF # Stack starts below 0xF0
 
     def set_A(self,value):
         self.A = value & 0xFF
@@ -55,8 +56,6 @@ class Tiny4CPU:
         elif opcode == 0x02: #STORE (02:XX) // Store value from reg A to mem addr XX
             self.RAM[operand] = self.A
             print(f"[STORE] from ${opcode:02X}, value = 0x{self.RAM[operand]:02X}, A = ${self.A:02X}")
-
-
 
         # Arithmetic logic
         elif opcode == 0x03: #ADD (03:XX) // Add value from mem addr XX to reg A
@@ -111,6 +110,16 @@ class Tiny4CPU:
         
         elif opcode == 0x0D: #OUT (0D:XX) // Print mem contents
             print(f"[OUT] RAM[{operand:02X}] = 0x{self.RAM[operand]:02X}")
+
+        elif opcode == 0x0E: # PUSH A // Saves current value of A reg to the STACK
+            self.RAM[self.SP] = self.A
+            self.SP = (self.SP - 1) & 0xFF
+            print(f"[PUSH] A=0x{self.A:02X} to SP=${(self.SP + 1) & 0xFF:02X}")
+
+        elif opcode == 0x0F: # POP A // Restores a previously saved value from the STACK to the A register
+            self.SP = (self.SP + 1) & 0xFF
+            self.set_A(self.RAM[self.SP])
+            print(f"[POP] A=0x{self.A:02X} from SP=${self.SP:02X}")
 
         # End logic
         elif opcode == 0xFF: #HALT (FF) // CPU instructions forcibly end

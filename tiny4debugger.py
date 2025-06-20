@@ -101,7 +101,8 @@ class Tiny4Debugger:
             0x00: "NOP", 0x01: "LOAD", 0x02: "STORE", 0x03: "ADD",
             0x04: "SUB", 0x05: "CMP", 0x06: "INC", 0x07: "DEC",
             0x08: "JMP", 0x09: "JZ", 0x0A: "JNZ", 0x0B: "CALL",
-            0x0C: "RET", 0x0D: "OUT", 0xFF: "HALT",
+            0x0C: "RET", 0x0D: "OUT", 0x0E: "POP", 0x0F: "PUSH",
+            0xFF: "HALT",
         }
         mnemonic = instruction_names.get(opcode, f"Unknown (${opcode:02X})")
         self.labelInstr.config(text=f"Instruction: {mnemonic}")
